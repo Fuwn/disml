@@ -1,4 +1,4 @@
-image: ocaml/opam2:latest
+image: ocaml/opam:latest
 
 before_script:
   - sudo apt-get -y install m4 pkg-config libssl-dev libffi-dev
