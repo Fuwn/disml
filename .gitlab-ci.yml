@@ -5,7 +5,6 @@ before_script:
   - opam init
   - eval `opam config env`
   - opam update
-  - opam pin add ppx_deriving_yojson --dev-repo -n
   - opam pin add disml .
 
 build:
