@@ -23,7 +23,7 @@ let decompress src =
         pos := !pos + len;
         len)
     (fun obuf len ->
-        Buffer.add_subbytes res obuf 0 len; 0xFFFF)
+        Buffer.add_subbytes res obuf ~pos:0 ~len:len; 0xFFFF)
     (Zlib_inflate.default ~witness:B.bytes window)
     |> function
     | Ok _ -> Buffer.contents res
@@ -95,7 +95,7 @@ module Shard = struct
         let seq = J.(member "s" payload |> to_int) in
         let t = J.(member "t" payload |> to_string) in
         let data = J.member "d" payload in
-        let session = if t = "READY" then begin
+        let session = if String.equal t "READY" then begin
             Ivar.fill_if_empty shard.ready ();
             Clock.after (Core.Time.Span.create ~sec:5 ())
             >>> (fun _ -> Mvar.put identify_lock () >>> ignore);
