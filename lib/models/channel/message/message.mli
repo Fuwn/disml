@@ -23,12 +23,13 @@ val unpin : t -> unit Deferred.Or_error.t
 (** Sugar for [Channel_id.say msg.channel_id content]. *)
 val reply : t -> string -> t Deferred.Or_error.t
 
-(** Sugar for [Channel_id.send_message ?embed ?content ?files ?tts msg.channel_id]. *)
+(** Sugar for [Channel_id.send_message ?embed ?content ?files ?tts ?reply_mention msg]. *)
 val reply_with :
     ?embed:Embed.t ->
     ?content:string ->
     ?files:(string * string) list ->
     ?tts:bool ->
+    ?reply_mention:bool ->
     t ->
     Message_t.t Deferred.Or_error.t
 

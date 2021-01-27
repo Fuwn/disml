@@ -21,12 +21,12 @@ module Base = struct
             else
                 let boundary = "--" ^ multipart_boundary in
                 let add_file (acc, idx) (filename, file_contents) =
-                    Printf.sprintf "%s\nContent-Disposition: form-data; name=\"file%i\"; filename=\"%s\"\n\n%s\n%s"
-                                    acc idx filename file_contents boundary, idx + 1
+                    sprintf "%s\nContent-Disposition: form-data; name=\"file%i\"; filename=\"%s\"\n\n%s\n%s"
+                            acc idx filename file_contents boundary, idx + 1
                 in
                 let file_data, _ = List.fold files ~init:("", 1) ~f:add_file in
-                Printf.sprintf "%s\nContent-Disposition: form-data; name=\"payload_json\"\n\n%s\n%s%s--"
-                               boundary json boundary file_data
+                sprintf "%s\nContent-Disposition: form-data; name=\"payload_json\"\n\n%s\n%s%s--"
+                        boundary json boundary file_data
         end |> Cohttp_async.Body.of_string
 
     let process_request_headers ?(multipart=false) () =

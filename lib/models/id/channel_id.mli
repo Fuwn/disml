@@ -26,6 +26,7 @@ val send_message :
     ?content:string ->
     ?files:(string * string) list ->
     ?tts:bool ->
+    ?reply:Message_id.t ->
     t ->
     Message_t.t Deferred.Or_error.t
 
