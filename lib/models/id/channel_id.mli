@@ -24,7 +24,7 @@ Client.message_create := check_command
 val send_message :
     ?embed:Embed.t ->
     ?content:string ->
-    ?file:string ->
+    ?files:(string * string) list ->
     ?tts:bool ->
     t ->
     Message_t.t Deferred.Or_error.t

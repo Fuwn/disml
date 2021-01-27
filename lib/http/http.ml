@@ -9,20 +9,32 @@ module Base = struct
 
     let base_url = "https://discordapp.com/api/v7"
 
+    let multipart_boundary = "2a8ae6ad-f4ad-4d9a-a92c-6d217011fe0f"
+
     let process_url path =
         Uri.of_string (base_url ^ path)
 
-    let process_request_body body =
-        body
-        |> Yojson.Safe.to_string
-        |> Cohttp_async.Body.of_string
+    let process_request_body ?(files=[]) body =
+        let json = body |> Yojson.Safe.to_string in begin
+            if List.is_empty files then
+                json
+            else
+                let boundary = "--" ^ multipart_boundary in
+                let add_file (acc, idx) (filename, file_contents) =
+                    Printf.sprintf "%s\nContent-Disposition: form-data; name=\"file%i\"; filename=\"%s\"\n\n%s\n%s"
+                                    acc idx filename file_contents boundary, idx + 1
+                in
+                let file_data, _ = List.fold files ~init:("", 1) ~f:add_file in
+                Printf.sprintf "%s\nContent-Disposition: form-data; name=\"payload_json\"\n\n%s\n%s%s--"
+                               boundary json boundary file_data
+        end |> Cohttp_async.Body.of_string
 
-    let process_request_headers () =
+    let process_request_headers ?(multipart=false) () =
         let h = Header.init () in
         Header.add_list h
-        [ "User-Agent", "DiscordBot (https://gitlab.com/Mishio595/disml, v0.2.3)"
+        [ "User-Agent", "DiscordBot (https://gitlab.com/Mishio595/disml, v0.2.5)"
         ; "Authorization", ("Bot " ^ !Client_options.token)
-        ; "Content-Type", "application/json"
+        ; "Content-Type", if multipart then "multipart/form-data; boundary=" ^ multipart_boundary else "application/json"
         ; "Connection", "keep-alive"
         ]
 
@@ -41,14 +53,14 @@ module Base = struct
             Logs.warn (fun m -> m "[Unsuccessful Response] [Code: %d]\n%s\n%s" code body headers);
             Deferred.Or_error.errorf "Unsuccessful response received: %d - %s" code body
 
-    let request ?(body=`Null) ?(query=[]) m path =
+    let request ?(files=[]) ?(body=`Null) ?(query=[]) m path =
         let limit, rlm = Rl.get_rl m path !rl in
         rl := rlm;
         Mvar.take limit >>= fun limit ->
         let process () =
             let uri = Uri.add_query_params' (process_url path) query in
-            let headers = process_request_headers () in
-            let body = process_request_body body in
+            let headers = process_request_headers ~multipart:(not (List.is_empty files)) () in
+            let body = process_request_body ~files:files body in
             (match m with
             | `Delete -> Cohttp_async.Client.delete ~headers ~body uri
             | `Get -> Cohttp_async.Client.get ~headers uri
@@ -85,8 +97,8 @@ let get_messages channel_id limit (kind, id) =
 let get_message channel_id message_id =
     Base.request `Get (Endpoints.channel_message channel_id message_id) >>| Result.map ~f:Message_t.of_yojson_exn
 
-let create_message channel_id body =
-    Base.request ~body:body `Post (Endpoints.channel_messages channel_id) >>| Result.map ~f:Message_t.of_yojson_exn
+let create_message ?(files=[]) channel_id body =
+    Base.request ~files ~body:body `Post (Endpoints.channel_messages channel_id) >>| Result.map ~f:Message_t.of_yojson_exn
 
 let create_reaction channel_id message_id emoji =
     Base.request `Put (Endpoints.channel_reaction_me channel_id message_id emoji) >>| Result.map ~f:ignore

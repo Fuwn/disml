@@ -50,8 +50,8 @@ let unpin msg =
 let reply msg content =
     Channel_id.say content msg.channel_id
 
-let reply_with ?embed ?content ?file ?tts msg =
-    Channel_id.send_message ?embed ?content ?file ?tts msg.channel_id
+let reply_with ?embed ?content ?files ?tts msg =
+    Channel_id.send_message ?embed ?content ?files ?tts msg.channel_id
 
 let set_content msg cont =
     let `Message_id id = msg.id in

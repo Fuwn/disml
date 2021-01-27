@@ -4,23 +4,19 @@ include Channel_id_t
 exception Invalid_message
 exception No_message_found
 
-let send_message ?embed ?content ?file ?(tts=false) ch =
+let send_message ?embed ?content ?files ?(tts=false) ch =
     let embed = match embed with
     | Some e -> Embed.to_yojson e
     | None -> `Null in
     let content = match content with
     | Some c -> `String c
     | None -> `Null in
-    let file = match file with
-    | Some f -> `String f
-    | None -> `Null in
     let () = match embed, content with
     | `Null, `Null -> raise Invalid_message
     | _ -> () in
-    Http.create_message (get_id ch) (`Assoc [
+    Http.create_message ?files (get_id ch) (`Assoc [
         ("embed", embed);
         ("content", content);
-        ("file", file);
         ("tts", `Bool tts);
     ])
 

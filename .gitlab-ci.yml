@@ -5,7 +5,7 @@ before_script:
   - opam init
   - eval `opam config env`
   - opam update
-  - opam pin add disml .
+  - opam pin add disml . --inplace-build
 
 build:
   stage: build

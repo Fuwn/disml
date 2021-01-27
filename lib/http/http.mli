@@ -6,8 +6,11 @@ module Base : sig
     val base_url : string
 
     val process_url : string -> Uri.t
-    val process_request_body : Yojson.Safe.t -> Cohttp_async.Body.t
-    val process_request_headers : unit -> Cohttp.Header.t
+    val process_request_body :
+        ?files:(string * string) list ->
+        Yojson.Safe.t ->
+        Cohttp_async.Body.t
+    val process_request_headers : ?multipart:bool -> unit -> Cohttp.Header.t
 
     val process_response :
         string ->
@@ -15,6 +18,7 @@ module Base : sig
         Yojson.Safe.t Deferred.Or_error.t
 
     val request :
+        ?files:(string * string) list ->
         ?body:Yojson.Safe.t ->
         ?query:(string * string) list ->
         [ `Delete | `Get | `Patch | `Post | `Put ] ->
@@ -31,7 +35,7 @@ val delete_channel : int -> Channel_t.t Deferred.Or_error.t
 val get_messages : int -> int -> string * int -> Message_t.t list Deferred.Or_error.t
 val get_message : int -> int -> Message_t.t Deferred.Or_error.t
 val create_message :
-    int -> Yojson.Safe.t -> Message_t.t Deferred.Or_error.t
+    ?files:(string * string) list -> int -> Yojson.Safe.t -> Message_t.t Deferred.Or_error.t
 val create_reaction :
     int -> int -> string -> unit Deferred.Or_error.t
 val delete_own_reaction :
