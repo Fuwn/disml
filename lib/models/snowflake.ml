@@ -10,10 +10,10 @@ let of_yojson d =
 
 let to_yojson s : Yojson.Safe.t = `String (Int.to_string s)
 
-let timestamp snowflake = (snowflake lsr 22) + 1_420_070_400_000
+let timestamp snowflake =  Int64.(+) (Int64.of_int (snowflake lsr 22)) 1_420_070_400_000L
 
 let time_of_t snowflake =
-    let t = timestamp snowflake |> float_of_int in
+    let t = timestamp snowflake |> Int64.to_float in
     Time.(Span.of_ms t
     |> of_span_since_epoch)
 
