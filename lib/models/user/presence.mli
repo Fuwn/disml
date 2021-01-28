@@ -4,4 +4,4 @@ type t = {
     game: Activity.t option; (** The current activity of the user, if any. *)
     status: string; (** One of [online], [idle], [offline], or [dnd]. *)
     activities: Activity.t list; (** A list of all of the user's current activities. *)
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]

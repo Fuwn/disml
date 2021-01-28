@@ -1,7 +1,7 @@
 type unavailable = {
     id: Guild_id_t.t;
     unavailable: bool;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** Used internally. *)
 type pre = {
@@ -30,7 +30,7 @@ type pre = {
     member_count: int option;
     members: Member_t.member list;
     channels: Channel_t.channel_wrapper list;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** A Guild object *)
 type t = {
@@ -59,7 +59,7 @@ type t = {
     member_count: int option; (** Total number of members in the guild. *)
     members: Member_t.t list; (** List of guild members. *)
     channels: Channel_t.t list; (** List of guild channels. *)
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 val wrap : pre -> t
 val get_id : t -> Snowflake.t

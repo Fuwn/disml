@@ -6,7 +6,7 @@ exception No_message_found
 
 let send_message ?embed ?content ?file ?(tts=false) ch =
     let embed = match embed with
-    | Some e -> Embed.to_yojson e
+    | Some e -> Embed.yojson_of_t e
     | None -> `Null in
     let content = match content with
     | Some c -> `String c
