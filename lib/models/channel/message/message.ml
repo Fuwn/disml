@@ -6,7 +6,7 @@ let add_reaction msg (emoji:Emoji.t) =
     let `Message_id id = msg.id in
     let `Channel_id channel_id = msg.channel_id in
     let e = match emoji.id with
-    | Some i -> Printf.sprintf "%s:%d" emoji.name i
+    | Some i -> Printf.sprintf "%s:%Ld" emoji.name i
     | None -> emoji.name
     in
     Http.create_reaction channel_id id e
@@ -17,7 +17,7 @@ let remove_reaction msg (emoji:Emoji.t) (user:User_t.t) =
     let `Channel_id channel_id = msg.channel_id in
     let `User_id user_id = user.id in
     let e = match emoji.id with
-    | Some i -> Printf.sprintf "%s:%d" emoji.name i
+    | Some i -> Printf.sprintf "%s:%Ld" emoji.name i
     | None -> emoji.name
     in
     Http.delete_reaction channel_id id e user_id

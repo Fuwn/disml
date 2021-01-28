@@ -6,10 +6,10 @@ let tag user =
 
 let mention user =
     let `User_id id = user.id in
-    Printf.sprintf "<@%d>" id
+    Printf.sprintf "<@%Ld>" id
 
 let default_avatar user =
-    let avatar = Int.of_string user.discriminator % 5 in
+    let avatar = Int64.(of_string user.discriminator % 5L) in
     Endpoints.cdn_default_avatar avatar
 
 let face user =

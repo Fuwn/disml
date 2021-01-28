@@ -91,7 +91,7 @@ let delete_channel channel_id =
     Base.request `Delete (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson_exn c |> wrap))
 
 let get_messages channel_id limit (kind, id) =
-    Base.request ~query:[(kind, string_of_int id); ("limit", string_of_int limit)] `Get (Endpoints.channel_messages channel_id)
+    Base.request ~query:[(kind, Int64.to_string id); ("limit", string_of_int limit)] `Get (Endpoints.channel_messages channel_id)
     >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Message_t.of_yojson_exn)
 
 let get_message channel_id message_id =
