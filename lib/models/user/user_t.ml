@@ -6,7 +6,7 @@ type partial_user = {
     discriminator: string option [@default None];
     avatar: string option [@default None];
     bot: bool [@default false];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = {
     id: User_id_t.t;
@@ -14,4 +14,4 @@ type t = {
     discriminator: string;
     avatar: string option [@default None];
     bot: bool [@default false];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]

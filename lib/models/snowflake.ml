@@ -1,6 +1,14 @@
 open Core
 
-type t = int64 [@@deriving sexp, yojson]
+type t = int64 [@@deriving sexp]
+
+let of_yojson_exn d = Yojson.Safe.Util.to_string d |> Int64.of_string
+
+let of_yojson d =
+    try Ok (of_yojson_exn d)
+    with Yojson.Safe.Util.Type_error (why,_) -> Error why
+
+let to_yojson s : Yojson.Safe.t = `String (Int64.to_string s)
 
 let timestamp snowflake =  Int64.((snowflake lsr 22) + 1_420_070_400_000L)
 

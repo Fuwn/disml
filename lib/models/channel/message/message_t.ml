@@ -20,4 +20,4 @@ type t = {
     pinned: bool;
     webhook_id: Snowflake.t option [@default None];
     kind: int [@key "type"];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]

@@ -5,4 +5,4 @@ type t =
 ; kind: string [@key "type"]
 ; allow: Permissions.t
 ; deny: Permissions.t
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]

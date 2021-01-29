@@ -113,7 +113,9 @@ let unban_user ~id ?reason guild =
 let get_member ~(id:User_id_t.t) guild =
     match List.find ~f:(fun m -> User_id.compare m.user.id id = 0) guild.members with
     | Some m -> Deferred.Or_error.return m
-    | None -> Http.get_member (get_id guild) (User_id.get_id id)
+    | None ->
+        let `User_id id = id in
+        Http.get_member (get_id guild) id
 
 let get_channel ~(id:Channel_id_t.t) guild =
     let `Channel_id id = id in
