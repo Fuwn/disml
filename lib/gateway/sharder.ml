@@ -130,7 +130,7 @@ module Shard = struct
 
     let request_guild_members ?(query="") ?(limit=0) ~guild shard =
         let payload = `Assoc
-            [ "guild_id", `String (Int64.to_string guild)
+            [ "guild_id", `String (Int.to_string guild)
             ; "query", `String query
             ; "limit", `Int limit
             ]

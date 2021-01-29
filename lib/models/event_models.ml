@@ -415,7 +415,7 @@ module GuildRoleDelete = struct
         if Cache.GuildMap.mem cache.guilds t.guild_id then
             let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g ->
-                let roles = List.filter g.roles ~f:(fun r -> Int64.(Role_id.get_id r.id <> Role_id.get_id t.role_id)) in
+                let roles = List.filter g.roles ~f:(fun r -> Role_id.get_id r.id <> Role_id.get_id t.role_id) in
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
@@ -437,7 +437,7 @@ module GuildRoleUpdate = struct
             | Some g ->
                 let `Guild_id guild_id = t.guild_id in
                 let roles = List.map g.roles ~f:(fun r ->
-                    if Int64.(Role_id.get_id r.id = Role_id.get_id t.role.id) then Role_t.wrap ~guild_id t.role else r) in
+                    if Role_id.get_id r.id = Role_id.get_id t.role.id then Role_t.wrap ~guild_id t.role else r) in
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in

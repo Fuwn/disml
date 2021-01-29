@@ -33,13 +33,16 @@ let delete ch =
 let get_message ~id ch =
     Http.get_message (get_id ch) id
 
-let get_messages ?(mode=`Around) ~id ?(limit=50) ch =
+let get_messages ?(mode=`Around) ?id ?(limit=50) ch =
     let kind = match mode with
-    | `Around -> "around", id
-    | `Before -> "before", id
-    | `After -> "after", id
+    | `Around -> "around", limit
+    | `Before -> "before", limit
+    | `After -> "after", limit
     in
-    Http.get_messages (get_id ch) limit kind
+    let id = match id with
+    | Some id -> id
+    | None -> raise No_message_found in
+    Http.get_messages (get_id ch) id kind
 
 let broadcast_typing ch =
     Http.broadcast_typing (get_id ch)
@@ -48,5 +51,5 @@ let get_pins ch =
     Http.get_pinned_messages (get_id ch)
 
 let bulk_delete msgs ch =
-    let msgs = `List (List.map ~f:(fun id -> `Intlit (Int64.to_string id)) msgs) in
+    let msgs = `List (List.map ~f:(fun id -> `Int id) msgs) in
     Http.bulk_delete (get_id ch) msgs
