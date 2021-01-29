@@ -8,9 +8,9 @@ module RouteMap : module type of Map.Make(String)
 
 (** Type representing ratelimit information. *)
 type rl = {
-    limit: int64;
-    remaining: int64;
-    reset: int64;
+    limit: int;
+    remaining: int;
+    reset: int;
 } [@@deriving sexp]
 
 (** Type representing the specific case of {!RouteMap}. *)

@@ -4,9 +4,9 @@ open Async
 module RouteMap = Map.Make(String)
 
 type rl = {
-    limit: int64;
-    remaining: int64;
-    reset: int64;
+    limit: int;
+    remaining: int;
+    reset: int;
 } [@@deriving sexp]
 
 (* TODO improve route getting, use Date header *)
@@ -25,13 +25,13 @@ let rl_of_header h =
     let module C = Cohttp.Header in
     match C.get h "X-RateLimit-Limit", C.get h "X-RateLimit-Remaining", C.get h "X-RateLimit-Reset" with
     | Some lim, Some rem, Some re ->
-        let limit = Int64.of_string lim in
-        let remaining = Int64.of_string rem in
-        let reset = Int64.of_string re in
+        let limit = Int.of_string lim in
+        let remaining = Int.of_string rem in
+        let reset = Int.of_string re in
         Some { limit; remaining; reset; }
     | _ -> None
 
-let default = { limit = 1L; remaining = 1L; reset = 0L; }
+let default = { limit = 1; remaining = 1; reset = 0; }
 let empty : t = RouteMap.empty
 let update = RouteMap.update
 let find = RouteMap.find

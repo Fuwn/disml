@@ -68,9 +68,9 @@ module Base = struct
             | `Post -> Cohttp_async.Client.post ~headers ~body uri
             | `Put -> Cohttp_async.Client.put ~headers ~body uri)
             >>= process_response path
-        in if Int64.(limit.remaining > 0L) then process ()
+        in if limit.remaining > 0 then process ()
         else
-            let time = Time.(limit.reset |> Int63.of_int64_trunc |> Span.of_int63_seconds |> of_span_since_epoch) in
+            let time = Time.(Span.of_int_sec limit.reset |> of_span_since_epoch) in
             Logs.debug (fun m -> m "Rate-limiting [Route: %s] [Duration: %d ms]" path Time.(diff time (Time.now ()) |> Span.to_ms |> Float.to_int) );
             Clock.at time >>= process
 end
