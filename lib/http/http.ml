@@ -68,9 +68,9 @@ module Base = struct
             | `Post -> Cohttp_async.Client.post ~headers ~body uri
             | `Put -> Cohttp_async.Client.put ~headers ~body uri)
             >>= process_response path
-        in if limit.remaining > 0 then process ()
+        in if Int64.(limit.remaining > 0L) then process ()
         else
-            let time = Time.(Span.of_int_sec limit.reset |> of_span_since_epoch) in
+            let time = Time.(limit.reset |> Int63.of_int64_trunc |> Span.of_int63_seconds |> of_span_since_epoch) in
             Logs.debug (fun m -> m "Rate-limiting [Route: %s] [Duration: %d ms]" path Time.(diff time (Time.now ()) |> Span.to_ms |> Float.to_int) );
             Clock.at time >>= process
 end
@@ -82,23 +82,23 @@ let get_gateway_bot () =
     Base.request `Get Endpoints.gateway_bot
 
 let get_channel channel_id =
-    Base.request `Get (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson_exn c |> wrap))
+    Base.request `Get (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson c |> wrap))
 
 let modify_channel channel_id body =
-    Base.request ~body `Patch (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson_exn c |> wrap))
+    Base.request ~body `Patch (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson c |> wrap))
 
 let delete_channel channel_id =
-    Base.request `Delete (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson_exn c |> wrap))
+    Base.request `Delete (Endpoints.channel channel_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson c |> wrap))
 
 let get_messages channel_id limit (kind, id) =
-    Base.request ~query:[(kind, string_of_int id); ("limit", string_of_int limit)] `Get (Endpoints.channel_messages channel_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Message_t.of_yojson_exn)
+    Base.request ~query:[(kind, Int64.to_string id); ("limit", string_of_int limit)] `Get (Endpoints.channel_messages channel_id)
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Message_t.t_of_yojson)
 
 let get_message channel_id message_id =
-    Base.request `Get (Endpoints.channel_message channel_id message_id) >>| Result.map ~f:Message_t.of_yojson_exn
+    Base.request `Get (Endpoints.channel_message channel_id message_id) >>| Result.map ~f:Message_t.t_of_yojson
 
 let create_message ?(files=[]) channel_id body =
-    Base.request ~files ~body:body `Post (Endpoints.channel_messages channel_id) >>| Result.map ~f:Message_t.of_yojson_exn
+    Base.request ~files ~body:body `Post (Endpoints.channel_messages channel_id) >>| Result.map ~f:Message_t.t_of_yojson
 
 let create_reaction channel_id message_id emoji =
     Base.request `Put (Endpoints.channel_reaction_me channel_id message_id emoji) >>| Result.map ~f:ignore
@@ -111,13 +111,13 @@ let delete_reaction channel_id message_id emoji user_id =
 
 let get_reactions channel_id message_id emoji =
     Base.request `Get (Endpoints.channel_reactions_get channel_id message_id emoji)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:User_t.of_yojson_exn)
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:User_t.t_of_yojson)
 
 let delete_reactions channel_id message_id =
     Base.request `Delete (Endpoints.channel_reactions_delete channel_id message_id) >>| Result.map ~f:ignore
 
 let edit_message channel_id message_id body =
-    Base.request ~body `Patch (Endpoints.channel_message channel_id message_id) >>| Result.map ~f:Message_t.of_yojson_exn
+    Base.request ~body `Patch (Endpoints.channel_message channel_id message_id) >>| Result.map ~f:Message_t.t_of_yojson
 
 let delete_message channel_id message_id =
     Base.request `Delete (Endpoints.channel_message channel_id message_id) >>| Result.map ~f:ignore
@@ -142,7 +142,7 @@ let broadcast_typing channel_id =
 
 let get_pinned_messages channel_id =
     Base.request `Get (Endpoints.channel_pins channel_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Message_t.of_yojson_exn)
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Message_t.t_of_yojson)
 
 let pin_message channel_id message_id =
     Base.request `Put (Endpoints.channel_pin channel_id message_id) >>| Result.map ~f:ignore
@@ -158,52 +158,52 @@ let group_recipient_remove channel_id user_id =
 
 let get_emojis guild_id =
     Base.request `Get (Endpoints.guild_emojis guild_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Emoji.of_yojson_exn)
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Emoji.t_of_yojson)
 
 let get_emoji guild_id emoji_id =
-    Base.request `Get (Endpoints.guild_emoji guild_id emoji_id) >>| Result.map ~f:Emoji.of_yojson_exn
+    Base.request `Get (Endpoints.guild_emoji guild_id emoji_id) >>| Result.map ~f:Emoji.t_of_yojson
 
 let create_emoji guild_id body =
-    Base.request ~body `Post (Endpoints.guild_emojis guild_id) >>| Result.map ~f:Emoji.of_yojson_exn
+    Base.request ~body `Post (Endpoints.guild_emojis guild_id) >>| Result.map ~f:Emoji.t_of_yojson
 
 let edit_emoji guild_id emoji_id body =
-    Base.request ~body `Patch (Endpoints.guild_emoji guild_id emoji_id) >>| Result.map ~f:Emoji.of_yojson_exn
+    Base.request ~body `Patch (Endpoints.guild_emoji guild_id emoji_id) >>| Result.map ~f:Emoji.t_of_yojson
 
 let delete_emoji guild_id emoji_id =
     Base.request `Delete (Endpoints.guild_emoji guild_id emoji_id) >>| Result.map ~f:ignore
 
 let create_guild body =
-    Base.request ~body `Post Endpoints.guilds >>| Result.map ~f:(fun g -> Guild_t.(pre_of_yojson_exn g |> wrap))
+    Base.request ~body `Post Endpoints.guilds >>| Result.map ~f:(fun g -> Guild_t.(pre_of_yojson g |> wrap))
 
 let get_guild guild_id =
-    Base.request `Get (Endpoints.guild guild_id) >>| Result.map ~f:(fun g -> Guild_t.(pre_of_yojson_exn g |> wrap))
+    Base.request `Get (Endpoints.guild guild_id) >>| Result.map ~f:(fun g -> Guild_t.(pre_of_yojson g |> wrap))
 
 let edit_guild guild_id body =
-    Base.request ~body `Patch (Endpoints.guild guild_id) >>| Result.map ~f:(fun g -> Guild_t.(pre_of_yojson_exn g |> wrap))
+    Base.request ~body `Patch (Endpoints.guild guild_id) >>| Result.map ~f:(fun g -> Guild_t.(pre_of_yojson g |> wrap))
 
 let delete_guild guild_id =
     Base.request `Delete (Endpoints.guild guild_id) >>| Result.map ~f:ignore
 
 let get_guild_channels guild_id =
     Base.request `Get (Endpoints.guild_channels guild_id)
-     >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun g -> Channel_t.(channel_wrapper_of_yojson_exn g |> wrap)))
+     >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun g -> Channel_t.(channel_wrapper_of_yojson g |> wrap)))
 
 let create_guild_channel guild_id body =
-    Base.request ~body `Post (Endpoints.guild_channels guild_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson_exn c |> wrap))
+    Base.request ~body `Post (Endpoints.guild_channels guild_id) >>| Result.map ~f:(fun c -> Channel_t.(channel_wrapper_of_yojson c |> wrap))
 
 let modify_guild_channel_positions guild_id body =
     Base.request ~body `Patch (Endpoints.guild_channels guild_id) >>| Result.map ~f:ignore
 
 let get_member guild_id user_id =
-    Base.request `Get (Endpoints.guild_member guild_id user_id) >>| Result.map ~f:(fun m -> Member_t.(member_of_yojson_exn m |> wrap ~guild_id))
+    Base.request `Get (Endpoints.guild_member guild_id user_id) >>| Result.map ~f:(fun m -> Member_t.(member_of_yojson m |> wrap ~guild_id))
 
 let get_members guild_id =
     Base.request `Get (Endpoints.guild_members guild_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun m -> Member_t.(member_of_yojson_exn m |> wrap ~guild_id)))
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun m -> Member_t.(member_of_yojson m |> wrap ~guild_id)))
 
 let add_member guild_id user_id body =
     Base.request ~body `Put (Endpoints.guild_member guild_id user_id)
-    >>| Result.map ~f:(fun m -> Member_t.(member_of_yojson_exn m |> wrap ~guild_id))
+    >>| Result.map ~f:(fun m -> Member_t.(member_of_yojson m |> wrap ~guild_id))
 
 let edit_member guild_id user_id body =
     Base.request ~body `Patch (Endpoints.guild_member guild_id user_id) >>| Result.map ~f:ignore
@@ -222,10 +222,10 @@ let remove_member_role guild_id user_id role_id =
 
 let get_bans guild_id =
     Base.request `Get (Endpoints.guild_bans guild_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Ban_t.of_yojson_exn)
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:Ban_t.t_of_yojson)
 
 let get_ban guild_id user_id =
-    Base.request `Get (Endpoints.guild_ban guild_id user_id) >>| Result.map ~f:Ban_t.of_yojson_exn
+    Base.request `Get (Endpoints.guild_ban guild_id user_id) >>| Result.map ~f:Ban_t.t_of_yojson
 
 let guild_ban_add guild_id user_id body =
     Base.request ~body `Put (Endpoints.guild_ban guild_id user_id) >>| Result.map ~f:ignore
@@ -235,17 +235,17 @@ let guild_ban_remove guild_id user_id body =
 
 let get_roles guild_id =
     Base.request `Get (Endpoints.guild_roles guild_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun r -> Role_t.(role_of_yojson_exn r |> wrap ~guild_id)))
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun r -> Role_t.(role_of_yojson r |> wrap ~guild_id)))
 
 let guild_role_add guild_id body =
-    Base.request ~body `Post (Endpoints.guild_roles guild_id) >>| Result.map ~f:(fun r -> Role_t.(role_of_yojson_exn r |> wrap ~guild_id))
+    Base.request ~body `Post (Endpoints.guild_roles guild_id) >>| Result.map ~f:(fun r -> Role_t.(role_of_yojson r |> wrap ~guild_id))
 
 let guild_roles_edit guild_id body =
     Base.request ~body `Patch (Endpoints.guild_roles guild_id)
-    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun r -> Role_t.(role_of_yojson_exn r |> wrap ~guild_id)))
+    >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun r -> Role_t.(role_of_yojson r |> wrap ~guild_id)))
 
 let guild_role_edit guild_id role_id body =
-    Base.request ~body `Patch (Endpoints.guild_role guild_id role_id) >>| Result.map ~f:(fun r -> Role_t.(role_of_yojson_exn r |> wrap ~guild_id))
+    Base.request ~body `Patch (Endpoints.guild_role guild_id role_id) >>| Result.map ~f:(fun r -> Role_t.(role_of_yojson r |> wrap ~guild_id))
 
 let guild_role_remove guild_id role_id =
     Base.request `Delete (Endpoints.guild_role guild_id role_id) >>| Result.map ~f:ignore
@@ -295,14 +295,14 @@ let delete_invite invite_code =
     Base.request `Delete (Endpoints.invite invite_code)
 
 let get_current_user () =
-    Base.request `Get Endpoints.me >>| Result.map ~f:User_t.of_yojson_exn
+    Base.request `Get Endpoints.me >>| Result.map ~f:User_t.t_of_yojson
 
 let edit_current_user body =
-    Base.request ~body `Patch Endpoints.me >>| Result.map ~f:User_t.of_yojson_exn
+    Base.request ~body `Patch Endpoints.me >>| Result.map ~f:User_t.t_of_yojson
 
 let get_guilds () =
     Base.request `Get Endpoints.me_guilds
-     >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun g -> Guild_t.(pre_of_yojson_exn g |> wrap)))
+     >>| Result.map ~f:(fun l -> Yojson.Safe.Util.to_list l |> List.map ~f:(fun g -> Guild_t.(pre_of_yojson g |> wrap)))
 
 let leave_guild guild_id =
     Base.request `Delete (Endpoints.me_guild guild_id) >>| Result.map ~f:ignore
@@ -320,7 +320,7 @@ let get_connections () =
     Base.request `Get Endpoints.me_connections
 
 let get_user user_id =
-    Base.request `Get (Endpoints.user user_id) >>| Result.map ~f:User_t.of_yojson_exn
+    Base.request `Get (Endpoints.user user_id) >>| Result.map ~f:User_t.t_of_yojson
 
 let get_voice_regions () =
     Base.request `Get Endpoints.regions

@@ -6,9 +6,9 @@ type reaction_event = {
     message_id: Message_id.t;
     guild_id: Guild_id_t.t option [@default None];
     emoji: Emoji.partial_emoji;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 type t = {
     count: int;
     emoji: Emoji.t;
-} [@@deriving sexp, yojson { strict = false; exn = true }]
+} [@@deriving sexp, yojson]

@@ -5,7 +5,7 @@ type partial_user = {
     discriminator: string option;
     avatar: string option;
     bot: bool;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** A user object. *)
 type t = {
@@ -14,4 +14,4 @@ type t = {
     discriminator: string; (** The 4 digits, as a string, that come after the '#' in a Discord username. *)
     avatar: string option; (** The hash of the user avatar, if they have one set. See {!User.face} to get the avatar URL. *)
     bot: bool; (** Whether the user is a bot. *)
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]

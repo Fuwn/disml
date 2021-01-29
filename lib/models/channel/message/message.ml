@@ -6,7 +6,7 @@ let add_reaction msg (emoji:Emoji.t) =
     let `Message_id id = msg.id in
     let `Channel_id channel_id = msg.channel_id in
     let e = match emoji.id with
-    | Some i -> Printf.sprintf "%s:%d" emoji.name i
+    | Some i -> Printf.sprintf "%s:%Ld" emoji.name i
     | None -> emoji.name
     in
     Http.create_reaction channel_id id e
@@ -15,9 +15,9 @@ let add_reaction msg (emoji:Emoji.t) =
 let remove_reaction msg (emoji:Emoji.t) (user:User_t.t) =
     let `Message_id id = msg.id in
     let `Channel_id channel_id = msg.channel_id in
-    let `User_id user_id = user.id in
+    let user_id = User_id.get_id user.id in
     let e = match emoji.id with
-    | Some i -> Printf.sprintf "%s:%d" emoji.name i
+    | Some i -> Printf.sprintf "%s:%Ld" emoji.name i
     | None -> emoji.name
     in
     Http.delete_reaction channel_id id e user_id
@@ -57,13 +57,13 @@ let reply_with ?embed ?content ?files ?tts ?(reply_mention=false) msg =
 let set_content msg cont =
     let `Message_id id = msg.id in
     let `Channel_id channel_id = msg.channel_id in
-    to_yojson { msg with content = cont; }
+    yojson_of_t { msg with content = cont; }
     |> Http.edit_message channel_id id
 
 
 let set_embed msg embed =
     let `Message_id id = msg.id in
     let `Channel_id channel_id = msg.channel_id in
-    to_yojson { msg with embeds = [embed]; }
+    yojson_of_t { msg with embeds = [embed]; }
     |> Http.edit_message channel_id id
 

@@ -3,4 +3,4 @@ type t =
 ; kind: string
 ; allow: Permissions.t
 ; deny: Permissions.t
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]

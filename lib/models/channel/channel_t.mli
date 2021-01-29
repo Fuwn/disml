@@ -9,14 +9,14 @@ type group = {
     name: string option;
     owner_id: User_id_t.t;
     recipients: User_t.t list;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** Represents a private channel with a single user. *)
 type dm = {
     id: Channel_id_t.t;
     last_message_id: Message_id.t option;
     last_pin_timestamp: string option;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** Represents a text channel in a guild. *)
 type guild_text = {
@@ -31,7 +31,7 @@ type guild_text = {
     nsfw: bool;
     slow_mode_timeout: int option;
     permission_overwrites: Overwrites.t list;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** Represents a voice channel in a guild. *)
 type guild_voice = {
@@ -43,7 +43,7 @@ type guild_voice = {
     user_limit: int;
     bitrate: int option;
     permission_overwrites: Overwrites.t list;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** Represents a guild category. *)
 type category = {
@@ -52,7 +52,7 @@ type category = {
     position: int;
     name: string;
     permission_overwrites: Overwrites.t list;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 (** Wrapper variant for all channel types. *)
 type t = [
@@ -61,7 +61,7 @@ type t = [
 | `GuildText of guild_text
 | `GuildVoice of guild_voice
 | `Category of category
-] [@@deriving sexp, yojson { exn = true }]
+] [@@deriving sexp, yojson]
 
 (** Intermediate used internally. *)
 type channel_wrapper = {
@@ -83,7 +83,7 @@ type channel_wrapper = {
     category_id: Channel_id_t.t option;
     last_pin_timestamp: string option;
     permission_overwrites: Overwrites.t list;
-} [@@deriving sexp, yojson { exn = true }]
+} [@@deriving sexp, yojson]
 
 val unwrap_as_guild_text : channel_wrapper -> guild_text
 
