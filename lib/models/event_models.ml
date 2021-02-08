@@ -4,7 +4,7 @@ module ChannelCreate = struct
     type t = Channel_t.t
 
     let deserialize ev =
-        Channel_t.(channel_wrapper_of_yojson ev |> wrap)
+        Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) (t:t) =
         let module C = Cache.ChannelMap in
@@ -35,7 +35,7 @@ module ChannelDelete = struct
     type t = Channel_t.t
 
     let deserialize ev =
-        Channel_t.(channel_wrapper_of_yojson ev |> wrap)
+        Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) (t:t) =
         let module C = Cache.ChannelMap in
@@ -61,7 +61,7 @@ module ChannelUpdate = struct
     type t = Channel_t.t
 
     let deserialize ev =
-        Channel_t.(channel_wrapper_of_yojson ev |> wrap)
+        Channel_t.(channel_wrapper_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) (t:t) =
         let module C = Cache.ChannelMap in
@@ -97,9 +97,9 @@ module ChannelPinsUpdate = struct
     type t =
     { channel_id: Channel_id.t
     ; last_pin_timestamp: string option [@default None]
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         let module C = Cache.ChannelMap in
@@ -127,7 +127,7 @@ end
     type t = {
         channel_id: Channel_id.t;
         user: User_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
 
@@ -138,7 +138,7 @@ end *)
     type t = {
         channel_id: Channel_id.t;
         user: User_t.t;
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
     let deserialize = of_yojson_exn
 
@@ -150,9 +150,9 @@ module GuildBanAdd = struct
     type t =
     { guild_id: Guild_id.t
     ; user: User_t.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -161,9 +161,9 @@ module GuildBanRemove = struct
     type t =
     { guild_id: Guild_id.t
     ; user: User_t.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -172,7 +172,7 @@ module GuildCreate = struct
     type t = Guild_t.t
 
     let deserialize ev =
-        Guild_t.(pre_of_yojson ev |> wrap)
+        Guild_t.(pre_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) (t:t) =
         let open Channel_t in
@@ -221,7 +221,7 @@ module GuildDelete = struct
     ; unavailable: bool
     }
 
-    let deserialize = Guild_t.unavailable_of_yojson
+    let deserialize = Guild_t.unavailable_of_yojson_exn
 
     let update_cache (cache:Cache.t) (t:t) =
         let open Channel_t in
@@ -261,7 +261,7 @@ module GuildUpdate = struct
     type t = Guild_t.t
 
     let deserialize ev =
-        Guild_t.(pre_of_yojson ev |> wrap)
+        Guild_t.(pre_of_yojson_exn ev |> wrap)
 
     let update_cache (cache:Cache.t) t =
         let open Guild_t in
@@ -275,9 +275,9 @@ module GuildEmojisUpdate = struct
     type t =
     { emojis: Emoji.t list
     ; guild_id: Guild_id.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
@@ -293,7 +293,7 @@ end
 module GuildMemberAdd = struct
     type t = Member_t.t
 
-    let deserialize = Member_t.t_of_yojson
+    let deserialize = Member_t.of_yojson_exn
 
     let update_cache (cache:Cache.t) (t:t) =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
@@ -311,9 +311,9 @@ module GuildMemberRemove = struct
     type t =
     { guild_id: Guild_id.t
     ; user: User_t.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
@@ -333,9 +333,9 @@ module GuildMemberUpdate = struct
     ; nick: string option
     ; roles: Role_id.t list
     ; user: User_t.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
@@ -356,9 +356,9 @@ module GuildMembersChunk = struct
     type t =
     { guild_id: Guild_id.t
     ; members: Member_t.member list
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         match Cache.GuildMap.find cache.guilds t.guild_id with
@@ -386,9 +386,9 @@ module GuildRoleCreate = struct
     type t =
     { guild_id: Guild_id.t
     ; role: Role_t.role
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
@@ -407,15 +407,15 @@ module GuildRoleDelete = struct
     type t =
     { guild_id: Guild_id.t
     ; role_id: Role_id.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
             let guilds = match Cache.GuildMap.find cache.guilds t.guild_id with
             | Some g ->
-                let roles = List.filter g.roles ~f:(fun r -> Int64.(Role_id.get_id r.id <> Role_id.get_id t.role_id)) in
+                let roles = List.filter g.roles ~f:(fun r -> Role_id.get_id r.id <> Role_id.get_id t.role_id) in
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
@@ -427,9 +427,9 @@ module GuildRoleUpdate = struct
     type t =
     { guild_id: Guild_id.t
     ; role: Role_t.role
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         if Cache.GuildMap.mem cache.guilds t.guild_id then
@@ -437,7 +437,7 @@ module GuildRoleUpdate = struct
             | Some g ->
                 let `Guild_id guild_id = t.guild_id in
                 let roles = List.map g.roles ~f:(fun r ->
-                    if Int64.(Role_id.get_id r.id = Role_id.get_id t.role.id) then Role_t.wrap ~guild_id t.role else r) in
+                    if Role_id.get_id r.id = Role_id.get_id t.role.id then Role_t.wrap ~guild_id t.role else r) in
                 let data = { g with roles } in
                 Cache.GuildMap.set cache.guilds ~key:t.guild_id ~data
             | None -> cache.guilds in
@@ -449,7 +449,7 @@ module MessageCreate = struct
     type t = Message_t.t
 
     let deserialize =
-        Message_t.t_of_yojson
+        Message_t.of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -459,9 +459,9 @@ module MessageDelete = struct
     { id: Message_id.t
     ; channel_id: Channel_id.t
     ; guild_id: Guild_id.t option [@default None]
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -487,9 +487,9 @@ module MessageUpdate = struct
     ; pinned: bool option [@default None]
     ; webhook_id: Snowflake.t option [@default None]
     ; kind: int option [@default None][@key "type"]
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -499,9 +499,9 @@ module MessageDeleteBulk = struct
     { guild_id: Guild_id.t option [@default None]
     ; channel_id: Channel_id.t
     ; ids: Message_id.t list
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -509,7 +509,7 @@ end
 module PresenceUpdate = struct
     type t = Presence.t
 
-    let deserialize = Presence.t_of_yojson
+    let deserialize = Presence.of_yojson_exn
 
     let update_cache (cache:Cache.t) (t:t) =
         let id = t.user.id in
@@ -520,7 +520,7 @@ end
 (* module PresencesReplace = struct
     type t =
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 end *)
 
 module ReactionAdd = struct
@@ -530,9 +530,9 @@ module ReactionAdd = struct
     ; message_id: Message_id.t
     ; guild_id: Guild_id.t option [@default None]
     ; emoji: Emoji.partial_emoji
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -544,9 +544,9 @@ module ReactionRemove = struct
     ; message_id: Message_id.t
     ; guild_id: Guild_id.t option [@default None]
     ; emoji: Emoji.partial_emoji
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -556,9 +556,9 @@ module ReactionRemoveAll = struct
     { channel_id: Channel_id.t
     ; message_id: Message_id.t
     ; guild_id: Guild_id.t option [@default None]
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -570,9 +570,9 @@ module Ready = struct
     ; private_channels: Channel_id.t list
     ; guilds: Guild_t.unavailable list
     ; session_id: string
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         let unavailable_guilds = match List.map t.guilds ~f:(fun g -> g.id, g) |> Cache.GuildMap.of_alist with
@@ -588,9 +588,9 @@ end
 
 module Resumed = struct
     type t = { trace: string option list [@key "_trace"] }
-    [@@deriving sexp, yojson]
+    [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -601,9 +601,9 @@ module TypingStart = struct
     ; guild_id: Guild_id.t option [@default None]
     ; timestamp: int
     ; user_id: User_id.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end
@@ -611,7 +611,7 @@ end
 module UserUpdate = struct
     type t = User_t.t
 
-    let deserialize = User_t.t_of_yojson
+    let deserialize = User_t.of_yojson_exn
 
     let update_cache (cache:Cache.t) t =
         let user = Some t in
@@ -622,9 +622,9 @@ module WebhookUpdate = struct
     type t =
     { channel_id: Channel_id.t
     ; guild_id: Guild_id.t
-    } [@@deriving sexp, yojson]
+    } [@@deriving sexp, yojson { strict = false; exn = true }]
 
-    let deserialize = t_of_yojson
+    let deserialize = of_yojson_exn
 
     let update_cache (cache:Cache.t) _t = cache
 end

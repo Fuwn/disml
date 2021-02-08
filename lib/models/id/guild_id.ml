@@ -82,7 +82,7 @@ let request_members guild =
     Http.get_members (get_id guild)
 
 let set_afk_channel ~id guild = Http.edit_guild (get_id guild) (`Assoc [
-    ("afk_channel_id", `Intlit (Int64.to_string id));
+    ("afk_channel_id", `Int id);
     ])
 
 let set_afk_timeout ~timeout guild = Http.edit_guild (get_id guild) (`Assoc [

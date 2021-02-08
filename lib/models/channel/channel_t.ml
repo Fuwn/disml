@@ -10,13 +10,13 @@ type group = {
     name: string option [@default None];
     owner_id: User_id_t.t;
     recipients: User_t.t list [@default []];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type dm = {
     id: Channel_id_t.t;
     last_message_id: Message_id.t option [@default None];
     last_pin_timestamp: string option [@default None];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type guild_text = {
     id: Channel_id_t.t;
@@ -30,7 +30,7 @@ type guild_text = {
     nsfw: bool;
     slow_mode_timeout: int option [@default None];
     permission_overwrites: Overwrites.t list [@default []];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type guild_voice = {
     id: Channel_id_t.t;
@@ -41,7 +41,7 @@ type guild_voice = {
     user_limit: int [@default -1];
     bitrate: int option [@default None];
     permission_overwrites: Overwrites.t list [@default []];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type category = {
     id: Channel_id_t.t;
@@ -49,7 +49,7 @@ type category = {
     position: int;
     name: string;
     permission_overwrites: Overwrites.t list [@default []];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type t = [
 | `Group of group
@@ -57,7 +57,7 @@ type t = [
 | `GuildText of guild_text
 | `GuildVoice of guild_voice
 | `Category of category
-] [@@deriving sexp, yojson]
+] [@@deriving sexp, yojson { strict = false; exn = true }]
 
 type channel_wrapper = {
     id: Channel_id_t.t;
@@ -78,7 +78,7 @@ type channel_wrapper = {
     category_id: Channel_id_t.t option [@default None][@key "parent_id"];
     last_pin_timestamp: string option [@default None];
     permission_overwrites: Overwrites.t list [@default []];
-} [@@deriving sexp, yojson]
+} [@@deriving sexp, yojson { strict = false; exn = true }]
 
 let unwrap_as_guild_text {id;guild_id;position;name;topic;nsfw;last_message_id;slow_mode_timeout;category_id;last_pin_timestamp;permission_overwrites;_} =
     let position = Option.value_exn position in
@@ -112,7 +112,7 @@ let wrap s =
     | 2 -> `GuildVoice (unwrap_as_guild_voice s)
     | 3 -> `Group (unwrap_as_group s)
     | 4 -> `Category (unwrap_as_category s)
-    | _ -> raise (Invalid_channel (yojson_of_channel_wrapper s))
+    | _ -> raise (Invalid_channel (channel_wrapper_to_yojson s))
 
 let get_id (c:t) = match c with
 | `Group g -> let `Channel_id id = g.id in id

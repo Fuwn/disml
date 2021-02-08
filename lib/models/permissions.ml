@@ -39,9 +39,13 @@ end)
 let sexp_of_t = Core.Int.sexp_of_t
 let t_of_sexp = Core.Int.t_of_sexp
 
-let t_of_yojson j = create @@ Yojson.Safe.Util.to_int j
+let of_yojson_exn j = create @@ Yojson.Safe.Util.to_int j
 
-let yojson_of_t t : Yojson.Safe.t = `Int t
+let of_yojson j =
+    try Ok (of_yojson_exn j)
+    with Yojson.Safe.Util.Type_error (why,_) -> Error why
+
+let to_yojson t : Yojson.Safe.t = `Int t
 
 let of_seq seq = List.of_seq seq |> of_list
 

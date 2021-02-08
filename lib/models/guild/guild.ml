@@ -89,7 +89,7 @@ let request_members guild =
     Http.get_members (get_id guild)
 
 let set_afk_channel ~id guild = Http.edit_guild (get_id guild) (`Assoc [
-    ("afk_channel_id", `Intlit (Int64.to_string id));
+    ("afk_channel_id", `Int id);
     ])
 
 let set_afk_timeout ~timeout guild = Http.edit_guild (get_id guild) (`Assoc [
@@ -113,14 +113,16 @@ let unban_user ~id ?reason guild =
 let get_member ~(id:User_id_t.t) guild =
     match List.find ~f:(fun m -> User_id.compare m.user.id id = 0) guild.members with
     | Some m -> Deferred.Or_error.return m
-    | None -> Http.get_member (get_id guild) (User_id.get_id id)
+    | None ->
+        let `User_id id = id in
+        Http.get_member (get_id guild) id
 
 let get_channel ~(id:Channel_id_t.t) guild =
     let `Channel_id id = id in
-    match List.find ~f:(fun c -> Int64.(Channel_t.get_id c = id)) guild.channels with
+    match List.find ~f:(fun c -> Channel_t.get_id c = id) guild.channels with
     | Some c -> Deferred.Or_error.return c
     | None -> Http.get_channel id
 
 (* TODO add HTTP fallback *)
 let get_role ~(id:Role_id.t) guild =
-    List.find ~f:(fun r -> Int64.(Role_id.get_id r.id = Role_id.get_id id)) guild.roles
+    List.find ~f:(fun r -> Role_id.get_id r.id = Role_id.get_id id) guild.roles
